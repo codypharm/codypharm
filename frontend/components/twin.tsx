@@ -17,12 +17,8 @@ export default function Twin() {
   const [sessionId, setSessionId] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = async () => {
@@ -44,9 +40,7 @@ export default function Twin() {
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/chat`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: input,
             session_id: sessionId || undefined,
@@ -57,35 +51,34 @@ export default function Twin() {
       if (!response.ok) throw new Error("Failed to send message");
 
       const data = await response.json();
+      if (!sessionId) setSessionId(data.session_id);
 
-      if (!sessionId) {
-        setSessionId(data.session_id);
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.response,
+          timestamp: new Date(),
+        },
+      ]);
     } catch (error) {
       console.error("Error:", error);
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Sorry, I ran into an error. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -93,80 +86,91 @@ export default function Twin() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-slate-700 to-slate-800 text-white p-4 rounded-t-lg">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Bot className="w-6 h-6" />
-          AI Digital Twin
-        </h2>
-        <p className="text-sm text-slate-300 mt-1">Your AI course companion</p>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-full bg-[#0a1628]">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 mt-8">
-            <Bot className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-            <p>Hello! I&apos;m your Digital Twin.</p>
-            <p className="text-sm mt-2">Ask me anything about AI deployment!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center px-4 gap-3">
+            <div className="w-12 h-12 rounded-full bg-[#4f8ef7]/15 flex items-center justify-center">
+              <Bot className="w-6 h-6 text-[#4f8ef7]" />
+            </div>
+            <p className="text-white/80 text-sm font-medium">
+              Hi, I&apos;m Codypharm&apos;s AI Twin
+            </p>
+            <p className="text-white/40 text-xs leading-relaxed max-w-[220px]">
+              Ask me about his work, projects, skills, or experience in AI & blockchain.
+            </p>
+            <div className="flex flex-col gap-1.5 w-full max-w-[260px] mt-1">
+              {[
+                "What projects have you built?",
+                "Tell me about your AI experience",
+                "Are you open to work?",
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => {
+                    setInput(suggestion);
+                  }}
+                  className="text-left text-xs text-[#4f8ef7]/80 hover:text-[#4f8ef7] bg-[#112240] hover:bg-[#1e3a5f] border border-[#4f8ef7]/15 hover:border-[#4f8ef7]/40 rounded-lg px-3 py-2 transition-all duration-200"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex gap-3 ${
+            className={`flex gap-2 ${
               message.role === "user" ? "justify-end" : "justify-start"
             }`}
           >
             {message.role === "assistant" && (
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
+              <div className="w-7 h-7 rounded-full bg-[#4f8ef7]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-[#4f8ef7]" />
               </div>
             )}
 
             <div
-              className={`max-w-[70%] rounded-lg p-3 ${
+              className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                 message.role === "user"
-                  ? "bg-slate-700 text-white"
-                  : "bg-white border border-gray-200 text-gray-800"
+                  ? "bg-[#4f8ef7] text-white rounded-tr-sm"
+                  : "bg-[#112240] text-white/85 border border-white/8 rounded-tl-sm"
               }`}
             >
               <p className="whitespace-pre-wrap">{message.content}</p>
               <p
-                className={`text-xs mt-1 ${
-                  message.role === "user" ? "text-slate-300" : "text-gray-500"
+                className={`text-[10px] mt-1 ${
+                  message.role === "user" ? "text-white/60 text-right" : "text-white/30"
                 }`}
               >
-                {message.timestamp.toLocaleTimeString()}
+                {message.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </p>
             </div>
 
             {message.role === "user" && (
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
+              <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <User className="w-4 h-4 text-white/70" />
               </div>
             )}
           </div>
         ))}
 
         {isLoading && (
-          <div className="flex gap-3 justify-start">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
-              </div>
+          <div className="flex gap-2 justify-start">
+            <div className="w-7 h-7 rounded-full bg-[#4f8ef7]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-4 h-4 text-[#4f8ef7]" />
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-3">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+            <div className="bg-[#112240] border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3">
+              <div className="flex gap-1.5 items-center h-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce delay-100" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce delay-200" />
               </div>
             </div>
           </div>
@@ -175,24 +179,26 @@ export default function Twin() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="border-t border-gray-200 p-4 bg-white rounded-b-lg">
-        <div className="flex gap-2">
-          <input
-            type="text"
+      {/* Input area */}
+      <div className="flex-shrink-0 px-3 pb-3 pt-2 border-t border-white/8 bg-[#0a1628]">
+        <div className="flex items-end gap-2 bg-[#112240] border border-white/10 rounded-2xl px-3 py-2 focus-within:border-[#4f8ef7]/50 transition-colors duration-200">
+          <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent text-gray-800"
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything…"
+            rows={1}
+            className="flex-1 bg-transparent text-white/90 placeholder-white/30 text-sm resize-none outline-none py-1 max-h-28 leading-relaxed"
             disabled={isLoading}
+            style={{ scrollbarWidth: "none" }}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mb-0.5 transition-all duration-200 bg-[#4f8ef7] hover:bg-[#2d5fa6] disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Send message"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 text-white" />
           </button>
         </div>
       </div>

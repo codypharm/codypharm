@@ -35,6 +35,11 @@ else
   TF_APPLY_CMD=(terraform apply -var="project_name=$PROJECT_NAME" -var="environment=$ENVIRONMENT" -auto-approve)
 fi
 
+# Export Resend vars for Terraform (TF_VAR_ prefix is picked up automatically)
+export TF_VAR_resend_api_key="${RESEND_API_KEY:-}"
+export TF_VAR_resend_from_email="${RESEND_FROM_EMAIL:-onboarding@resend.dev}"
+export TF_VAR_notification_email="${NOTIFICATION_EMAIL:-williamikeji@gmail.com}"
+
 echo "🎯 Applying Terraform..."
 "${TF_APPLY_CMD[@]}"
 

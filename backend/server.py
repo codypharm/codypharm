@@ -8,6 +8,7 @@ import json
 import uuid
 from datetime import datetime
 import boto3
+import resend
 from botocore.exceptions import ClientError
 from context import prompt
 
@@ -26,13 +27,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Bedrock client - see Q42 on https://edwarddonner.com/faq if the Region gives you problems
+# Initialize Bedrock client
 bedrock_client = boto3.client(
-    service_name="bedrock-runtime", 
-    region_name=os.getenv("DEFAULT_AWS_REGION", "us-east-1")
+    service_name="bedrock-runtime",
+    region_name=os.getenv("DEFAULT_AWS_REGION", "us-east-1"),
 )
 
-# Bedrock model selection - see Q42 on https://edwarddonner.com/faq for more
 BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "global.amazon.nova-2-lite-v1:0")
 
 # Memory storage configuration
@@ -40,12 +40,101 @@ USE_S3 = os.getenv("USE_S3", "false").lower() == "true"
 S3_BUCKET = os.getenv("S3_BUCKET", "")
 MEMORY_DIR = os.getenv("MEMORY_DIR", "../memory")
 
-# Initialize S3 client if needed
 if USE_S3:
     s3_client = boto3.client("s3")
 
+# ── Tool definition ─────────────────────────────────────────────────────────
 
-# Request/Response models
+CONTACT_TOOL = {
+    "toolSpec": {
+        "name": "collect_client_contact",
+        "description": (
+            "Use this tool when a visitor expresses interest in working with Chukwunonso, "
+            "wants to be contacted, or asks how to reach him. Collect their name, email address, "
+            "and what they would like to discuss, then call this tool to send him a notification."
+        ),
+        "inputSchema": {
+            "json": {
+                "type": "object",
+                "properties": {
+                    "client_name": {
+                        "type": "string",
+                        "description": "The visitor's full name",
+                    },
+                    "client_email": {
+                        "type": "string",
+                        "description": "The visitor's email address",
+                    },
+                    "inquiry": {
+                        "type": "string",
+                        "description": "A brief description of what they want to discuss or work on",
+                    },
+                },
+                "required": ["client_name", "client_email"],
+            }
+        },
+    }
+}
+
+
+# ── Resend notification ──────────────────────────────────────────────────────
+
+def send_contact_notification(client_name: str, client_email: str, inquiry: str) -> str:
+    """Send contact notification to Chukwunonso via Resend."""
+    resend.api_key = os.getenv("RESEND_API_KEY", "")
+    if not resend.api_key:
+        print("RESEND_API_KEY not set — skipping email")
+        return "error: RESEND_API_KEY not configured"
+
+    notification_email = os.getenv("NOTIFICATION_EMAIL", "williamikeji@gmail.com")
+    from_email = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+
+    try:
+        resend.Emails.send({
+            "from": from_email,
+            "to": [notification_email],
+            "subject": f"New contact from your AI Twin: {client_name}",
+            "html": f"""
+                <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;
+                            background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">
+                  <h2 style="margin:0 0 16px;color:#0a1628">New Contact Request</h2>
+                  <table style="width:100%;border-collapse:collapse">
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7280;font-size:14px;width:120px">Name</td>
+                      <td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600">
+                        {client_name}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7280;font-size:14px">Email</td>
+                      <td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600">
+                        <a href="mailto:{client_email}" style="color:#4f8ef7">{client_email}</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7280;font-size:14px;vertical-align:top">
+                        Inquiry
+                      </td>
+                      <td style="padding:8px 0;color:#111827;font-size:14px">
+                        {inquiry or 'Not specified'}
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:20px 0 0;font-size:12px;color:#9ca3af">
+                    Sent via your AI Digital Twin portfolio
+                  </p>
+                </div>
+            """,
+        })
+        print(f"Contact notification sent for {client_name} <{client_email}>")
+        return "success"
+    except Exception as e:
+        print(f"Resend error: {e}")
+        return f"error: {str(e)}"
+
+
+# ── Request / Response models ────────────────────────────────────────────────
+
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
@@ -62,13 +151,13 @@ class Message(BaseModel):
     timestamp: str
 
 
-# Memory management functions
+# ── Memory management ────────────────────────────────────────────────────────
+
 def get_memory_path(session_id: str) -> str:
     return f"{session_id}.json"
 
 
 def load_conversation(session_id: str) -> List[Dict]:
-    """Load conversation history from storage"""
     if USE_S3:
         try:
             response = s3_client.get_object(Bucket=S3_BUCKET, Key=get_memory_path(session_id))
@@ -78,7 +167,6 @@ def load_conversation(session_id: str) -> List[Dict]:
                 return []
             raise
     else:
-        # Local file storage
         file_path = os.path.join(MEMORY_DIR, get_memory_path(session_id))
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -87,7 +175,6 @@ def load_conversation(session_id: str) -> List[Dict]:
 
 
 def save_conversation(session_id: str, messages: List[Dict]):
-    """Save conversation history to storage"""
     if USE_S3:
         s3_client.put_object(
             Bucket=S3_BUCKET,
@@ -96,67 +183,88 @@ def save_conversation(session_id: str, messages: List[Dict]):
             ContentType="application/json",
         )
     else:
-        # Local file storage
         os.makedirs(MEMORY_DIR, exist_ok=True)
         file_path = os.path.join(MEMORY_DIR, get_memory_path(session_id))
         with open(file_path, "w") as f:
             json.dump(messages, f, indent=2)
 
 
+# ── Bedrock agentic loop ─────────────────────────────────────────────────────
+
 def call_bedrock(conversation: List[Dict], user_message: str) -> str:
-    """Call AWS Bedrock with conversation history"""
-    
-    # Build messages in Bedrock format
+    """Call Bedrock with tool support, looping until end_turn."""
     messages = []
-    
-    # Add system prompt as first user message
-    # Or there's a better way to do this - pass in system=[{"text": prompt()}] to the converse call below
-    messages.append({
-        "role": "user", 
-        "content": [{"text": f"System: {prompt()}"}]
-    })
-    
-    # Add conversation history (limit to last 25 exchanges)
+
+    # Rebuild message history in Bedrock format (no fake system message)
     for msg in conversation[-50:]:
         messages.append({
             "role": msg["role"],
-            "content": [{"text": msg["content"]}]
+            "content": [{"text": msg["content"]}],
         })
-    
-    # Add current user message
-    messages.append({
-        "role": "user",
-        "content": [{"text": user_message}]
-    })
-    
-    try:
-        # Call Bedrock using the converse API
-        response = bedrock_client.converse(
-            modelId=BEDROCK_MODEL_ID,
-            messages=messages,
-            inferenceConfig={
-                "maxTokens": 2000,
-                "temperature": 0.7,
-                "topP": 0.9
-            }
-        )
-        
-        # Extract the response text
-        return response["output"]["message"]["content"][0]["text"]
-        
-    except ClientError as e:
-        error_code = e.response['Error']['Code']
-        if error_code == 'ValidationException':
-            # Handle message format issues
-            print(f"Bedrock validation error: {e}")
-            raise HTTPException(status_code=400, detail="Invalid message format for Bedrock")
-        elif error_code == 'AccessDeniedException':
-            print(f"Bedrock access denied: {e}")
-            raise HTTPException(status_code=403, detail="Access denied to Bedrock model")
-        else:
-            print(f"Bedrock error: {e}")
-            raise HTTPException(status_code=500, detail=f"Bedrock error: {str(e)}")
 
+    messages.append({"role": "user", "content": [{"text": user_message}]})
+
+    for _ in range(5):  # safety cap
+        try:
+            response = bedrock_client.converse(
+                modelId=BEDROCK_MODEL_ID,
+                messages=messages,
+                system=[{"text": prompt()}],
+                toolConfig={"tools": [CONTACT_TOOL]},
+                inferenceConfig={
+                    "maxTokens": 2000,
+                    "temperature": 0.7,
+                    "topP": 0.9,
+                },
+            )
+        except ClientError as e:
+            code = e.response["Error"]["Code"]
+            if code == "ValidationException":
+                print(f"Bedrock validation error: {e}")
+                raise HTTPException(status_code=400, detail="Invalid message format for Bedrock")
+            elif code == "AccessDeniedException":
+                print(f"Bedrock access denied: {e}")
+                raise HTTPException(status_code=403, detail="Access denied to Bedrock model")
+            else:
+                print(f"Bedrock error: {e}")
+                raise HTTPException(status_code=500, detail=f"Bedrock error: {str(e)}")
+
+        stop_reason = response["stopReason"]
+        assistant_msg = response["output"]["message"]
+
+        if stop_reason == "end_turn":
+            # Extract text from potentially mixed content
+            for block in assistant_msg["content"]:
+                if "text" in block:
+                    return block["text"]
+            return ""
+
+        if stop_reason == "tool_use":
+            messages.append(assistant_msg)
+            tool_results = []
+            for block in assistant_msg["content"]:
+                if "toolUse" not in block:
+                    continue
+                tool = block["toolUse"]
+                tool_input = tool.get("input", {})
+                result = send_contact_notification(
+                    client_name=tool_input.get("client_name", ""),
+                    client_email=tool_input.get("client_email", ""),
+                    inquiry=tool_input.get("inquiry", ""),
+                )
+                tool_results.append({
+                    "toolResult": {
+                        "toolUseId": tool["toolUseId"],
+                        "content": [{"text": result}],
+                    }
+                })
+            messages.append({"role": "user", "content": tool_results})
+            # loop → Bedrock generates final confirmation text
+
+    raise HTTPException(status_code=500, detail="Agent loop exceeded maximum iterations")
+
+
+# ── Routes ───────────────────────────────────────────────────────────────────
 
 @app.get("/")
 async def root():
@@ -164,44 +272,36 @@ async def root():
         "message": "AI Digital Twin API (Powered by AWS Bedrock)",
         "memory_enabled": True,
         "storage": "S3" if USE_S3 else "local",
-        "ai_model": BEDROCK_MODEL_ID
+        "ai_model": BEDROCK_MODEL_ID,
     }
 
 
 @app.get("/health")
 async def health_check():
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "use_s3": USE_S3,
-        "bedrock_model": BEDROCK_MODEL_ID
+        "bedrock_model": BEDROCK_MODEL_ID,
     }
 
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
-
-        # Load conversation history
         conversation = load_conversation(session_id)
-
-        # Call Bedrock for response
         assistant_response = call_bedrock(conversation, request.message)
 
-        # Update conversation history
-        conversation.append(
-            {"role": "user", "content": request.message, "timestamp": datetime.now().isoformat()}
-        )
-        conversation.append(
-            {
-                "role": "assistant",
-                "content": assistant_response,
-                "timestamp": datetime.now().isoformat(),
-            }
-        )
-
-        # Save conversation
+        conversation.append({
+            "role": "user",
+            "content": request.message,
+            "timestamp": datetime.now().isoformat(),
+        })
+        conversation.append({
+            "role": "assistant",
+            "content": assistant_response,
+            "timestamp": datetime.now().isoformat(),
+        })
         save_conversation(session_id, conversation)
 
         return ChatResponse(response=assistant_response, session_id=session_id)
@@ -215,7 +315,6 @@ async def chat(request: ChatRequest):
 
 @app.get("/conversation/{session_id}")
 async def get_conversation(session_id: str):
-    """Retrieve conversation history"""
     try:
         conversation = load_conversation(session_id)
         return {"session_id": session_id, "messages": conversation}
@@ -225,5 +324,4 @@ async def get_conversation(session_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -51,3 +51,21 @@ variable "root_domain" {
   type        = string
   default     = ""
 }
+
+variable "resend_api_key" {
+  description = "Resend API key for outbound email notifications"
+  type        = string
+  sensitive   = true
+}
+
+variable "resend_from_email" {
+  description = "Verified sender address in Resend (must be verified in your Resend account)"
+  type        = string
+  default     = "onboarding@resend.dev"
+}
+
+variable "notification_email" {
+  description = "Email address to receive contact notifications from the AI Twin"
+  type        = string
+  default     = "williamikeji@gmail.com"
+}

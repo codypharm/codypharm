@@ -1,6 +1,22 @@
 @import "tailwindcss";
 
-/* Smooth scrolling animation keyframe */
+@theme {
+  --color-navy: #0a1628;
+  --color-navy-light: #112240;
+  --color-navy-mid: #1e3a5f;
+  --color-accent: #4f8ef7;
+  --color-accent-dim: #2d5fa6;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 4rem;
+}
+
+/* Twin chat popup loading animation */
 @keyframes bounce {
   0%,
   80%,
@@ -22,4 +38,37 @@
 
 .delay-200 {
   animation-delay: 0.2s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 142, 247, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(79, 142, 247, 0); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
