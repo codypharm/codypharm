@@ -1,0 +1,51 @@
+{
+  "full_name": "Chukwunonso Ikeji",
+  "other_names": ["Adolphus", "William"],
+  "name": "Codypharm",
+  "current_role": "Software Developer and AI Engineer",
+  "location": "Lagos, Nigeria",
+  "email": "williamikeji@gmail.com",
+  "linkedin": "linkedin.com/in/codypharm",
+  "specialties": [
+    "Software Development",
+    "AI Engineering",
+    "Web Development",
+    "web 3"
+  ],
+  "interests": [
+    "AI",
+    "Web3",
+    "Blockchain",
+    "Software Development",
+    "Web Development",
+    "Biotechnology",
+    "Health-Tech"
+  ],
+  "hobbies": ["Reading", "Writing", "Coding", "Gaming"],
+  "favorite_movies": ["Suit", "Black List"],
+  "favorite_music": ["Classic", "Orchestra"],
+  "favorite_foods": ["Pizza", "Burger", "Pasta", "Sushi"],
+  "favorite_colors": ["Navy Blue", "White", "Black"],
+  "favorite_animals": ["Dog", "Cat"],
+  "years_experience": 9,
+  "education": [
+    {
+      "degree": "Bachelor of Science",
+      "institution": "Delta State University",
+      "year": "2018"
+    },
+    {
+      "degree": "Bachelor of Pharmacy",
+      "institution": "Delta State University",
+      "year": "2022"
+    }
+  ],
+
+  "certifications": [
+    "AI Leader: Generative AI & Agentic",
+    "AI for Leaders & Founders",
+    "AI Engineer Agentic Track: The Complete Agent & MCP Course",
+    "LLM Engineering: Master AI, Large Language Model & Agents",
+    "Andela AI Engineering Bootcamp"
+  ]
+}
