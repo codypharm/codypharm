@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from typing import Optional, List, Dict
 import json
+import re
 import uuid
 from datetime import datetime
 import boto3
@@ -44,6 +45,22 @@ if USE_S3:
     s3_client = boto3.client("s3")
 
 # ── Tool definition ─────────────────────────────────────────────────────────
+
+def strip_thinking(text: str) -> str:
+    """Remove <thinking>...</thinking> blocks that some models emit as reasoning traces."""
+    return re.sub(r"<thinking>.*?</thinking>", "", text, flags=re.DOTALL).strip()
+
+
+EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
+
+def already_sent_notification(conversation: List[Dict]) -> bool:
+    """Return True if a contact notification was already sent in this session."""
+    for msg in conversation:
+        if msg.get("role") == "assistant" and "message has been sent" in msg.get("content", "").lower():
+            return True
+    return False
+
 
 CONTACT_TOOL = {
     "toolSpec": {
@@ -204,13 +221,24 @@ def call_bedrock(conversation: List[Dict], user_message: str) -> str:
 
     messages.append({"role": "user", "content": [{"text": user_message}]})
 
+    # If the user's message contains an email and we haven't already notified,
+    # force tool use so the model can't skip it with a plain-text response.
+    force_tool = (
+        bool(EMAIL_RE.search(user_message))
+        and not already_sent_notification(conversation)
+    )
+    tool_config = {
+        "tools": [CONTACT_TOOL],
+        "toolChoice": {"any": {}} if force_tool else {"auto": {}},
+    }
+
     for _ in range(5):  # safety cap
         try:
             response = bedrock_client.converse(
                 modelId=BEDROCK_MODEL_ID,
                 messages=messages,
                 system=[{"text": prompt()}],
-                toolConfig={"tools": [CONTACT_TOOL]},
+                toolConfig=tool_config,
                 inferenceConfig={
                     "maxTokens": 2000,
                     "temperature": 0.7,
@@ -236,7 +264,7 @@ def call_bedrock(conversation: List[Dict], user_message: str) -> str:
             # Extract text from potentially mixed content
             for block in assistant_msg["content"]:
                 if "text" in block:
-                    return block["text"]
+                    return strip_thinking(block["text"])
             return ""
 
         if stop_reason == "tool_use":
@@ -259,7 +287,8 @@ def call_bedrock(conversation: List[Dict], user_message: str) -> str:
                     }
                 })
             messages.append({"role": "user", "content": tool_results})
-            # loop → Bedrock generates final confirmation text
+            # Subsequent iterations use auto — the model just needs to confirm
+            tool_config = {"tools": [CONTACT_TOOL], "toolChoice": {"auto": {}}}
 
     raise HTTPException(status_code=500, detail="Agent loop exceeded maximum iterations")
 
