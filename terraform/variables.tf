@@ -56,6 +56,7 @@ variable "resend_api_key" {
   description = "Resend API key for outbound email notifications"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "resend_from_email" {
