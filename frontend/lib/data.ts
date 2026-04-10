@@ -29,7 +29,7 @@ export const SKILLS: SkillCategory[] = [
   {
     label: "AI & LLMs",
     icon: "Brain",
-    items: ["LangChain", "LangGraph", "RAG Systems", "Amazon Bedrock", "Agentic Workflows", "Prompt Engineering", "Vector DBs", "OpenAI API"],
+    items: ["LangChain", "LangGraph", "Crew AI", "OpenAI SDK", "RAG Systems", "Amazon Bedrock", "Agentic Workflows", "Prompt Engineering", "Vector DBs", "OpenAI API"],
   },
   {
     label: "Backend",
