@@ -1,17 +1,18 @@
-import { Mail, Globe, ExternalLink } from "lucide-react";
+import { Mail } from "lucide-react";
 import { PROFILE } from "@/lib/data";
+import { GithubIcon, LinkedinIcon } from "@/components/icons";
 
 export default function Contact() {
   return (
     <section id="contact" className="bg-navy py-24">
       <div className="container mx-auto px-6 max-w-5xl">
         {/* Section header */}
-        <div className="mb-14">
-          <span className="text-accent text-sm font-medium tracking-widest uppercase">
+        <div className="flex items-center gap-3 mb-12 w-full justify-center lg:justify-start">
+          <div className="w-3 h-3 border-2 border-accent flex items-center justify-center p-0.5">
+            <div className="w-1.5 h-1.5 bg-accent"></div>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-widest">
             Contact
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-2">
-            Let&apos;s work together
           </h2>
         </div>
 
@@ -51,7 +52,7 @@ export default function Contact() {
               className="flex items-center gap-4 bg-navy-light hover:bg-navy-mid border border-white/10 hover:border-accent/30 rounded-xl px-5 py-4 transition-all duration-200 group"
             >
               <div className="w-10 h-10 rounded-xl bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center flex-shrink-0 transition-colors duration-200">
-                <Globe className="w-5 h-5 text-accent" />
+                <LinkedinIcon className="w-5 h-5 text-accent" />
               </div>
               <div>
                 <p className="text-white/50 text-xs">LinkedIn</p>
@@ -66,7 +67,7 @@ export default function Contact() {
               className="flex items-center gap-4 bg-navy-light hover:bg-navy-mid border border-white/10 hover:border-accent/30 rounded-xl px-5 py-4 transition-all duration-200 group"
             >
               <div className="w-10 h-10 rounded-xl bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center flex-shrink-0 transition-colors duration-200">
-                <ExternalLink className="w-5 h-5 text-accent" />
+                <GithubIcon className="w-5 h-5 text-accent" />
               </div>
               <div>
                 <p className="text-white/50 text-xs">GitHub</p>

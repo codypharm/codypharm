@@ -6,11 +6,11 @@ export default function Certifications() {
     <section id="certifications" className="bg-navy-light py-24">
       <div className="container mx-auto px-6 max-w-6xl">
         {/* Section header */}
-        <div className="mb-14">
-          <span className="text-accent text-sm font-medium tracking-widest uppercase">
-            Credentials
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-2">
+        <div className="flex items-center gap-3 mb-12 w-full justify-center sm:justify-start">
+          <div className="w-3 h-3 border-2 border-accent flex items-center justify-center p-0.5">
+            <div className="w-1.5 h-1.5 bg-accent"></div>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-widest">
             Certifications &amp; Education
           </h2>
         </div>

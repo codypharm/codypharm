@@ -27,10 +27,11 @@ export default function Navbar() {
           {/* Logo */}
           <a
             href="#hero"
-            className="text-white font-bold text-lg tracking-tight hover:text-accent transition-colors duration-200"
+            className="text-white font-bold text-lg tracking-tight hover:text-accent transition-colors duration-200 flex items-center gap-1"
           >
+            <span className="text-accent">&lt;/&gt;</span>
             {PROFILE.alias}
-            <span className="text-accent">.</span>
+            <span className="text-accent">&gt;</span>
           </a>
 
           {/* Desktop nav */}
@@ -39,9 +40,10 @@ export default function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
-                className="text-white/60 hover:text-white text-sm font-medium px-3 py-1.5 rounded-md hover:bg-white/5 transition-all duration-200"
+                className="relative text-white/60 hover:text-white text-sm font-medium px-3 py-1.5 transition-all duration-200 group"
               >
                 {item.label}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
           </div>
@@ -49,7 +51,7 @@ export default function Navbar() {
           {/* Desktop CTA */}
           <a
             href={`mailto:${PROFILE.email}`}
-            className="hidden md:flex items-center gap-2 bg-accent hover:bg-accent-dim text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
+            className="hidden md:flex items-center gap-2 border border-accent text-accent hover:bg-accent/10 text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
           >
             Hire Me
           </a>
@@ -77,7 +79,7 @@ export default function Navbar() {
               key={item.href}
               href={item.href}
               onClick={closeMenu}
-              className="block text-white/70 hover:text-white text-sm font-medium px-3 py-2.5 rounded-md hover:bg-white/5 transition-all duration-200"
+              className="block text-white/70 hover:text-accent text-sm font-medium px-3 py-2.5 rounded-md transition-all duration-200"
             >
               {item.label}
             </a>
@@ -86,7 +88,7 @@ export default function Navbar() {
             <a
               href={`mailto:${PROFILE.email}`}
               onClick={closeMenu}
-              className="block text-center bg-accent hover:bg-accent-dim text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors duration-200"
+              className="block text-center border border-accent text-accent hover:bg-accent/10 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors duration-200"
             >
               Hire Me
             </a>

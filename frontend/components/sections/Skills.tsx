@@ -10,43 +10,50 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Cpu,
 };
 
+const BORDER_COLORS = ["#4f8ef7", "#4ade80", "#8b5cf6", "#facc15", "#4ddada"];
+
 export default function Skills() {
   return (
     <section id="skills" className="bg-navy py-24">
-      <div className="container mx-auto px-6 max-w-6xl">
+      <div className="container mx-auto px-6 max-w-5xl">
         {/* Section header */}
-        <div className="mb-14">
-          <span className="text-accent text-sm font-medium tracking-widest uppercase">
+        <div className="flex items-center gap-3 mb-10 w-full justify-center lg:justify-start">
+          <div className="w-3 h-3 border-2 border-accent flex items-center justify-center p-0.5">
+            <div className="w-1.5 h-1.5 bg-accent"></div>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-widest">
             Skills
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-2">
-            Technologies I work with
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {SKILLS.map((category) => {
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {SKILLS.map((category, index) => {
             const Icon = ICON_MAP[category.icon] ?? Brain;
+            const borderColor = BORDER_COLORS[index % BORDER_COLORS.length];
             return (
               <div
                 key={category.label}
-                className="bg-navy-light border border-white/10 hover:border-accent/30 rounded-2xl p-6 transition-colors duration-200 group"
+                className="bg-navy-light shadow-lg hover:bg-navy-mid transition-colors duration-300 rounded-lg p-6 flex flex-col items-center justify-start text-center group border-b-4"
+                style={{ borderBottomColor: borderColor }}
               >
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center transition-colors duration-200">
-                    <Icon className="w-5 h-5 text-accent" />
-                  </div>
-                  <h3 className="text-white font-semibold">{category.label}</h3>
+                <div className="w-12 h-12 flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110">
+                  <Icon className="w-8 h-8 text-white" />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {category.items.map((skill) => (
+                <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4">{category.label}</h3>
+                <div className="flex flex-wrap justify-center gap-1.5 mt-auto">
+                  {category.items.slice(0, 3).map((skill) => (
                     <span
                       key={skill}
-                      className="px-2.5 py-1 rounded-md bg-navy-mid border border-accent/20 text-white/80 text-xs font-medium"
+                      className="px-2 py-0.5 rounded bg-navy text-accent text-[10px] uppercase font-bold"
                     >
                       {skill}
                     </span>
                   ))}
+                  {category.items.length > 3 && (
+                    <span className="px-2 py-0.5 rounded bg-navy text-white/50 text-[10px] font-bold">
+                      +{category.items.length - 3}
+                    </span>
+                  )}
                 </div>
               </div>
             );

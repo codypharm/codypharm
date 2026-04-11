@@ -41,12 +41,12 @@ export default function TwinPopup() {
         }`}
         aria-hidden={!open}
       >
-        <div className="bg-[#0a1628] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex flex-col overflow-hidden w-[380px] h-[520px] sm:w-[400px] sm:h-[540px]">
+        <div className="bg-navy border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex flex-col overflow-hidden w-[380px] h-[520px] sm:w-[400px] sm:h-[540px]">
           {/* Popup header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-[#112240] border-b border-white/8 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 bg-navy-light border-b border-white/8 flex-shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#4f8ef7]/15 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-[#4f8ef7]" />
+              <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-accent" />
               </div>
               <div>
                 <p className="text-white text-sm font-semibold leading-none">Codypharm&apos;s AI Twin</p>
@@ -55,7 +55,7 @@ export default function TwinPopup() {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="p-1.5 text-white/40 hover:text-white hover:bg-white/8 rounded-lg transition-colors duration-200"
+              className="p-1.5 text-white/40 hover:text-white hover:bg-white/8 rounded-lg transition-colors duration-200 cursor-pointer"
               aria-label="Close chat"
             >
               <X className="w-4 h-4" />
@@ -72,7 +72,7 @@ export default function TwinPopup() {
       {/* Trigger button */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-black/30 transition-all duration-200 animate-pulse-glow ${
+        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-black/30 transition-all duration-200 animate-pulse-glow cursor-pointer ${
           open
             ? "bg-slate-700 hover:bg-slate-600 rotate-0"
             : "bg-accent hover:bg-accent-dim"

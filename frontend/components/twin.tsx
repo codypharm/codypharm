@@ -86,13 +86,13 @@ export default function Twin() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0a1628]">
+    <div className="flex flex-col h-full bg-navy">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4 gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#4f8ef7]/15 flex items-center justify-center">
-              <Bot className="w-6 h-6 text-[#4f8ef7]" />
+            <div className="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center">
+              <Bot className="w-6 h-6 text-accent" />
             </div>
             <p className="text-white/80 text-sm font-medium">
               Hi, I&apos;m Codypharm&apos;s AI Twin
@@ -111,7 +111,7 @@ export default function Twin() {
                   onClick={() => {
                     setInput(suggestion);
                   }}
-                  className="text-left text-xs text-[#4f8ef7]/80 hover:text-[#4f8ef7] bg-[#112240] hover:bg-[#1e3a5f] border border-[#4f8ef7]/15 hover:border-[#4f8ef7]/40 rounded-lg px-3 py-2 transition-all duration-200"
+                  className="text-left text-xs text-accent/80 hover:text-accent bg-navy-light hover:bg-navy-mid border border-accent/15 hover:border-accent/40 rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer"
                 >
                   {suggestion}
                 </button>
@@ -128,16 +128,16 @@ export default function Twin() {
             }`}
           >
             {message.role === "assistant" && (
-              <div className="w-7 h-7 rounded-full bg-[#4f8ef7]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Bot className="w-4 h-4 text-[#4f8ef7]" />
+              <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-accent" />
               </div>
             )}
 
             <div
               className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                 message.role === "user"
-                  ? "bg-[#4f8ef7] text-white rounded-tr-sm"
-                  : "bg-[#112240] text-white/85 border border-white/8 rounded-tl-sm"
+                  ? "bg-accent text-white rounded-tr-sm"
+                  : "bg-navy-light text-white/85 border border-white/8 rounded-tl-sm"
               }`}
             >
               <p className="whitespace-pre-wrap">{message.content}</p>
@@ -163,14 +163,14 @@ export default function Twin() {
 
         {isLoading && (
           <div className="flex gap-2 justify-start">
-            <div className="w-7 h-7 rounded-full bg-[#4f8ef7]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Bot className="w-4 h-4 text-[#4f8ef7]" />
+            <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-4 h-4 text-accent" />
             </div>
-            <div className="bg-[#112240] border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-navy-light border border-white/8 rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1.5 items-center h-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce delay-100" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4f8ef7]/60 animate-bounce delay-200" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce delay-100" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce delay-200" />
               </div>
             </div>
           </div>
@@ -180,22 +180,27 @@ export default function Twin() {
       </div>
 
       {/* Input area */}
-      <div className="flex-shrink-0 px-3 pb-3 pt-2 border-t border-white/8 bg-[#0a1628]">
-        <div className="flex items-end gap-2 bg-[#112240] border border-white/10 rounded-2xl px-3 py-2 focus-within:border-[#4f8ef7]/50 transition-colors duration-200">
+      <div className="flex-shrink-0 px-3 pb-3 pt-2 border-t border-white/8 bg-navy">
+        <div className="flex items-end gap-2 bg-navy-light border border-white/10 rounded-2xl px-3 py-2 focus-within:border-accent/50 transition-colors duration-200">
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Auto-resize textarea to fit content
+              e.target.style.height = 'auto';
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 112)}px`;
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything…"
             rows={1}
             className="flex-1 bg-transparent text-white/90 placeholder-white/30 text-sm resize-none outline-none py-1 max-h-28 leading-relaxed"
             disabled={isLoading}
-            style={{ scrollbarWidth: "none" }}
+            style={{ scrollbarWidth: "none", overflow: "hidden" }}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
-            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mb-0.5 transition-all duration-200 bg-[#4f8ef7] hover:bg-[#2d5fa6] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mb-0.5 transition-all duration-200 bg-accent hover:bg-accent-dim disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             aria-label="Send message"
           >
             <Send className="w-4 h-4 text-white" />
