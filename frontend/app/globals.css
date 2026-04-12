@@ -8,6 +8,7 @@
   --color-accent-dim: #32b5b5;
 }
 
+/* ─── Base resets ─── */
 html {
   scroll-behavior: smooth;
 }
@@ -16,7 +17,150 @@ section[id] {
   scroll-margin-top: 4rem;
 }
 
-/* Twin chat popup loading animation */
+/* ─── Taste-skill: Viewport stability (never use h-screen) ─── */
+.hero-height {
+  min-height: 100dvh;
+}
+
+/* ─── Liquid Glass Refraction ─── */
+/* Frosted glass with physical edge refraction — inner border + inner shadow */
+.glass {
+  background: rgba(34, 41, 51, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 20px 40px -15px rgba(0, 0, 0, 0.3);
+}
+
+.glass-strong {
+  background: rgba(34, 41, 51, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 20px 40px -15px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Diffusion Shadows (tinted to background hue) ─── */
+.shadow-diffuse {
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-accent {
+  box-shadow: 0 20px 40px -15px rgba(77, 218, 218, 0.12);
+}
+
+/* ─── Tactile Press Feedback ─── */
+/* On :active, simulate a physical button push */
+.press {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.press:active {
+  transform: scale(0.97) translateY(1px);
+}
+
+/* ─── Stagger Animation Index ─── */
+/* Use --index CSS var on children for cascading delays */
+.stagger-child {
+  animation-delay: calc(var(--index, 0) * 80ms);
+}
+
+/* ─── Keyframes (hardware-accelerated: transform + opacity only) ─── */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Breathing pulse for status indicators */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+/* Subtle perpetual float for decorative elements */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Text blink cursor */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Loading bounce for chat dots */
 @keyframes bounce {
   0%,
   80%,
@@ -40,35 +184,108 @@ section[id] {
   animation-delay: 0.2s;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.animate-blink {
-  animation: blink 1s step-end infinite;
-}
-
+/* Chat trigger glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(77, 218, 218, 0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(77, 218, 218, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(77, 218, 218, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(77, 218, 218, 0);
+  }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Mesh gradient background blobs ─── */
+@keyframes blob-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes blob-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.15);
+  }
+  66% {
+    transform: translate(25px, -40px) scale(0.85);
+  }
+}
+
+.mesh-blob-1 {
+  animation: blob-drift-1 12s ease-in-out infinite;
+}
+
+.mesh-blob-2 {
+  animation: blob-drift-2 15s ease-in-out infinite;
+}
+
+/* ─── Grain/Noise Overlay ─── */
+/* Applied to a fixed pseudo-element, never to scrolling containers */
+.grain-overlay::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* ─── Spotlight Border Effect ─── */
+/* Parent needs position: relative and overflow: hidden */
+.spotlight-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-border::before {
+  content: "";
+  position: absolute;
+  top: var(--mouse-y, 50%);
+  left: var(--mouse-x, 50%);
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(77, 218, 218, 0.15) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.spotlight-border:hover::before {
+  opacity: 1;
+}
+
+/* Ensure content sits above the spotlight */
+.spotlight-border > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Fluid transition base (taste-skill MOTION_INTENSITY 4-7) ─── */
+.transition-fluid {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

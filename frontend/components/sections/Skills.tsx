@@ -40,7 +40,7 @@ export default function Skills() {
                   <Icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4">{category.label}</h3>
-                <div className="flex flex-wrap justify-center gap-1.5 mt-auto">
+                <div className="relative flex flex-wrap justify-center gap-1.5 mt-auto w-full">
                   {category.items.slice(0, 3).map((skill) => (
                     <span
                       key={skill}
@@ -49,10 +49,34 @@ export default function Skills() {
                       {skill}
                     </span>
                   ))}
+                  
                   {category.items.length > 3 && (
-                    <span className="px-2 py-0.5 rounded bg-navy text-white/50 text-[10px] font-bold">
-                      +{category.items.length - 3}
-                    </span>
+                    <>
+                      {/* The +N Badge - Illuminates on hover */}
+                      <span className="px-2 py-0.5 rounded bg-navy text-white/50 text-[10px] font-bold transition-all duration-300 group-hover:bg-accent/15 group-hover:text-accent">
+                        +{category.items.length - 3}
+                      </span>
+                      
+                      {/* Floating Glass Tooltip - Reveals all skills on hover */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-[200px] p-3 rounded-2xl bg-navy-light/95 backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 origin-bottom z-50 flex flex-wrap justify-center gap-1.5 pointer-events-none">
+                        <div className="w-full text-center text-accent/60 text-[9px] uppercase tracking-widest mb-1.5 font-bold">
+                          All Skills
+                        </div>
+                        {category.items.map((skill) => (
+                          <span
+                            key={skill}
+                            className="px-2 py-0.5 rounded bg-navy text-white/90 text-[10px] uppercase font-bold border border-white/5"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {/* Downward triangle pointer */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white/10">
+                          {/* Inner triangle to match background */}
+                          <div className="absolute bottom-[1px] -left-[5.5px] border-[5.5px] border-transparent border-t-navy-light/95" />
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
